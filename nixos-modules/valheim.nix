@@ -149,7 +149,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    nixpkgs.overlays = [self.overlays.default steam-fetcher.overlays.default];
+    nixpkgs.overlays = [self.overlays.default steam-fetcher.overlay];
 
     users = {
       users.valheim = {
@@ -229,25 +229,22 @@ in {
 
             # BepInEx *really* doesn't like *any* read-only files.
             chmod -R u+w ${installDir}/BepInEx/config/
+
+            chmod -R u+rwx ${installDir}/start_server_bepinex.sh
           '';
 
         serviceConfig = let
-          valheimBepInExFHSEnvWrapper = pkgs.buildFHSUserEnv {
+          valheimBepInExFHSEnvWrapper = pkgs.buildFHSEnv {
             name = "valheim-server";
             runScript = pkgs.writeScript "valheim-server-bepinex-wrapper" ''
-              # Whether or not to enable Doorstop. Valid values: TRUE or FALSE
-              export DOORSTOP_ENABLE=TRUE
+              export DOORSTOP_ENABLED=1
+              export DOORSTOP_TARGET_ASSEMBLY=${installDir}/BepInEx/core/BepInEx.Preloader.dll
 
-              # What .NET assembly to execute. Valid value is a path to a .NET DLL that mono can execute.
-              export DOORSTOP_INVOKE_DLL_PATH="${installDir}/BepInEx/core/BepInEx.Preloader.dll"
+              export LD_LIBRARY_PATH="${installDir}/doorstop_libs:${pkgs.steamworks-sdk-redist}/lib:$LD_LIBRARY_PATH"
+              export LD_PRELOAD="libdoorstop_x64.so:${pkgs.steamworks-sdk-redist}/lib:$LD_PRELOAD"
 
-              # Which folder should be put in front of the Unity dll loading path
-              export DOORSTOP_CORLIB_OVERRIDE_PATH="${installDir}/unstripped_corlib"
 
-              export LD_LIBRARY_PATH=${installDir}/doorstop_libs:$LD_LIBRARY_PATH
-              export LD_PRELOAD="libdoorstop_x64.so"
-
-              export LD_LIBRARY_PATH=${pkgs.steamworks-sdk-redist}/lib:$LD_LIBRARY_PATH
+              export LD_LIBRARY_PATH="${installDir}/linux64:$LD_LIBRARY_PATH"
               export SteamAppId=892970
 
               exec ${installDir}/valheim_server.x86_64 "$@"

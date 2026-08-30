@@ -5,8 +5,10 @@
   valheim-server,
 }:
 stdenv.mkDerivation (finalAttrs: {
+  # denikson-BepInExPack_Valheim-5.4.2333
+  # https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/
   name = "BepInExPack-Valheim";
-  version = "5.4.2202";
+  version = "5.4.2333";
 
   # While BepInEx is open-source, there are no publicly available steps for
   # reproducing the BepInEx Valheim pack.
@@ -14,7 +16,7 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "denikson";
     name = "BepInExPack_Valheim";
     inherit (finalAttrs) version;
-    hash = "sha256-wI66hX6T7SWNsXJ3xO7/S5OqCsbz0pSNcQGBB2Q4e3c=";
+    hash = "sha256-Ru/kKWeX/yLr45wtAuynEZMU4T0UlFMChWsYyqI/AYY=";
   };
 
   # Skip phases that don't apply to prebuilt binaries.
@@ -26,12 +28,7 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
 
     mkdir $out
-    cp -r \
-      BepInExPack_Valheim/BepInEx \
-      BepInExPack_Valheim/doorstop_config.ini \
-      BepInExPack_Valheim/doorstop_libs \
-      BepInExPack_Valheim/winhttp.dll \
-      $out
+    cp -r BepInExPack_Valheim/* $out
 
     runHook postInstall
   '';
